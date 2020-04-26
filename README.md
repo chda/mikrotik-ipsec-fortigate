@@ -29,7 +29,7 @@ Step 3. Make current configuration backup (full and exported script)
 
 Step 4. Switch to terminal. Login as admin. Execute script
 ```
-:execute ipsec-setup.rsc
+/import ipsec-setup.rsc
 ```
 and follow onscreen instructions.
 
