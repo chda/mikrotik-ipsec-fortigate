@@ -23,9 +23,9 @@ Step 3. Use any secure way to supply to remote workers:
 ## Instructions for Mikrotik users
 Step 1. Ensure you know Fortigate IP address, PSK, your user name and password
 
-Step 2. Upload setup script (https://github.com/chda/mikrotik-ipsec-fortigate/edit/master/ipsec-setup.rsc) to Mikrotik router via Winbox, WebFig or SFTP
+Step 2. Upgrade RouterOS to 6.46+
 
-Step 3. Make current configuration backup (full and exported script)
+Step 3. Upload setup script (https://github.com/chda/mikrotik-ipsec-fortigate/blob/master/ipsec-setup.rsc) to Mikrotik router via Winbox, WebFig or SFTP
 
 Step 4. Switch to terminal. Login as admin. Execute script
 ```
@@ -35,4 +35,4 @@ and follow onscreen instructions.
 
 Step 5. Go to IP/Firewall/Address-list and adjust trusted IP addresses.
 
-Step 6. Check IPSec connection. Make new backup and compare with previous one.
+Step 6. Check IPSec connection.

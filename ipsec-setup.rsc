@@ -155,7 +155,8 @@
     # You can adjust algorithms and other parameters here
     :put "Creating new IPSec config..."
     policy group add name=$ipsecname
-    mode-config add name=$ipsecname responder=no src-address-list=$lanlist
+    mode-config add name=$ipsecname responder=no src-address-list=$lanlist \
+        connection-mark=$ipsecname
     profile add name=$ipsecname dh-group=modp2048 enc-algorithm=aes-256 \
         hash-algorithm=sha1 dpd-interval=2m dpd-maximum-failures=5 \
         lifetime=1d nat-traversal=yes proposal-check=obey
@@ -231,6 +232,11 @@
         place-before=$place
 
     # Configure mangle to stop fasttracking ipsec
+    :put "Creating blackhole bridge..."
+    /interface bridge
+    :if ( [ :len [ find name=$ipsecname ] ] = 0 ) do={
+        add name=$ipsecname protocol-mode=none
+    }
     :put "Fasttrack workaround..."
     /ip firewall filter
     :if ( [ :len [ find action=fasttrack-connection disabled=no ] ] > 0 ) do={
@@ -241,10 +247,14 @@
         }
     }
     /ip firewall mangle
+    remove [ find action=mark-routing chain=prerouting \
+        dst-address-list=$ipseclist ]
+    add action=mark-routing chain=prerouting new-routing-mark=$ipsecname \
+        dst-address-list=$ipseclist connection-mark=$ipsecname passthrough=yes
     remove [ find action=mark-connection chain=forward \
-             dst-address-list=$ipseclist out-interface=$internetif ]
+             dst-address-list=$ipseclist out-interface=$ipsecname ]
     add action=mark-connection chain=forward dst-address-list=$ipseclist \
-        out-interface=$internetif new-connection-mark=$ipsecname passthrough=no
+        out-interface=$ipsecname new-connection-mark=$ipsecname passthrough=no
     remove [ find action=mark-connection chain=forward ipsec-policy="in,ipsec" ]
     add action=mark-connection chain=forward ipsec-policy=in,ipsec \
         new-connection-mark=$ipsecname passthrough=no
@@ -321,7 +331,8 @@
     :foreach i in=[ /ip firewall address-list find list=$ipseclist ] do={
         :local net [ /ip firewall address-list get $i address ]
         remove [ find static=yes gateway=$internetgw dst-address=$net ]
-        add gateway=$internetgw dst-address=$net distance=$defaultdistance
+        remove [ find static=yes gateway=$ipsecname dst-address=$net ]
+        add gateway=$ipsecname dst-address=$net distance=$defaultdistance
     }
 
     # Filter unencrypted output to grey IP into internet
