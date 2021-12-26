@@ -194,7 +194,7 @@
     # Make DHCP leases static
     /ip firewall address-list
     :foreach i in=[ find list=$trustedlist ] do={
-        :local ip [ get $i address ]
+        :local ip [ :toip [ get $i address ] ]
         :if ( ( [ :typeof $ip ] = "ip" ) and \
               ( [ :len [ /ip dhcp-server lease find dynamic=yes \
                          address=$ip ] ] = 1 ) ) do={
